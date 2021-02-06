@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
 public class LineHandlerThread {
-
+    private final HashMap<String, Integer> words = new HashMap<>();
     private final HashMap<String, WordInfo> wordInfoHashMap = new HashMap<>();
     private String lastWord = null;
 

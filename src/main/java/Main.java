@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Main {
-    static String outputFile = "output.txt";
+    static final String OUTPUT_TXT = "output.txt";
     static String hunspellDic = "", hunspellAff = "";
     static int threadCount = 0;
     static String fileName = "";
@@ -34,8 +34,6 @@ public class Main {
         BufferedReader br = new BufferedReader(new FileReader(fileName));
 
         LineHandler lineHandler = new LineHandler(threadCount);
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-
 
         int i = 0;
         for (String line = br.readLine(); line != null; line = br.readLine()) {
@@ -65,14 +63,14 @@ public class Main {
                 ///.filter(wordInfo -> hunspell.spell(wordInfo.getWord()))
                 .collect(Collectors.toList());
 
-        HashMap<Integer, String> wordIndex = new HashMap<>();
+        HashMap<String, String> wordIndex = new HashMap<>();
 
         for (int i = 0; i < words.size(); i++) {
-            wordIndex.put(words.get(i).getWordInt(), Integer.toString(i, 36));
+            wordIndex.put(words.get(i).getWord(), Integer.toString(i, 36));
         }
 
         try {
-            PrintWriter writer = new PrintWriter(outputFile, "UTF-8");
+            PrintWriter writer = new PrintWriter(OUTPUT_TXT, "UTF-8");
             words.forEach(wordInfo -> {
                 writer.println(wordInfo.toString(wordIndex));
             });

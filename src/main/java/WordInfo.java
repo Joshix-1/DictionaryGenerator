@@ -1,40 +1,14 @@
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class WordInfo {
-    private final static ConcurrentHashMap<String, Integer> WORDS = new ConcurrentHashMap<>();
-
-    private static int wordToInt(String word) {
-        if (!WORDS.containsKey(word)) {
-            WORDS.put(word, WORDS.size());
-        }
-        return WORDS.get(word);
-    }
-
-    private static String[] wordArr = new String[0];
-    synchronized private static String intToWord(int w) {
-        if (wordArr.length == WORDS.size()) {
-            return wordArr[w];
-        }
-
-        wordArr = new String[WORDS.size()];
-        WORDS.forEach((str, i) -> {
-            wordArr[i] = str;
-        });
-
-        return wordArr[w];
-    }
-
-    private final int word;
-    private final ConcurrentHashMap<Integer, Integer> nextWords = new ConcurrentHashMap<>();
-
+    private final String word;
+    private final HashMap<String, Integer> nextWords = new HashMap<>();
     private int count;
 
     public WordInfo(String word) {
-        this.word = wordToInt(word);
+        this.word = word;
         count = 1;
     }
 
@@ -42,24 +16,23 @@ public class WordInfo {
         return count;
     }
 
-    public String getWord() {
-        return intToWord(word);
-    }
-
-    public int getWordInt() {
-        return word;
-    }
-
-    synchronized public void increaseCount() {
+    public void increaseCount() {
         count++;
     }
 
-    synchronized public void addNextWord(String word) {
-        int w = wordToInt(word);
-        nextWords.put(w, nextWords.getOrDefault(w, 0) + 1);
+    public void addNextWord(String word) {
+        addNextWord(word, 1);
     }
 
-    public String getNextWordsAsString(HashMap<Integer, String> wordsIndex) {
+    private void addNextWord(String word, int count) {
+        nextWords.put(word, nextWords.getOrDefault(word, 0) + count);
+    }
+
+    public String toString(HashMap<String, String> wordsIndex) {
+        return wordsIndex.get(word) + ":" + word + ";" + count + ";" + getNextWordsAsString(wordsIndex);
+    }
+
+    public String getNextWordsAsString(HashMap<String, String> wordsIndex) {
         if (nextWords.size() == 0) {
             return "{}";
         }
@@ -70,7 +43,7 @@ public class WordInfo {
                 .stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .forEach(entry -> {
-                    sb.append(wordsIndex.getOrDefault(entry.getKey(), intToWord(entry.getKey())))
+                    sb.append(wordsIndex.getOrDefault(entry.getKey(), entry.getKey()))
                             .append(":")
                             .append(entry.getValue())
                             .append(",");
@@ -81,7 +54,14 @@ public class WordInfo {
         return sb.toString();
     }
 
-    public String toString(HashMap<Integer, String> wordsIndex) {
-        return wordsIndex.get(word) + ":" + intToWord(word) + ";" + count + ";" + getNextWordsAsString(wordsIndex);
+    public void merge(WordInfo wordInfo) {
+        if (getWord().equals(wordInfo.getWord())) {
+            wordInfo.nextWords.forEach(this::addNextWord);
+            count += wordInfo.count;
+        }
+    }
+
+    public String getWord() {
+        return word;
     }
 }

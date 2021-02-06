@@ -8,10 +8,11 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class LineHandler {
-    private  static final int LINES_IN_THREAD = 1000;
+    private  static final int LINES_IN_THREAD = 10_000;
     private final HashMap<String, WordInfo> wordInfoHashMap = new HashMap<>();
     private final List<CompletableFuture<Void>> futures = new LinkedList<>();
     private final ExecutorService executorService;
+
     public LineHandler(int threadCount) {
         executorService = Executors.newFixedThreadPool(threadCount);
     }
@@ -34,7 +35,13 @@ public class LineHandler {
     }
 
     synchronized private void mergeWordInfoMap(HashMap<String, WordInfo> wordInfoHashMap1) {
-
+        wordInfoHashMap1.forEach((word, info) -> {
+            if (wordInfoHashMap.containsKey(word)) {
+                wordInfoHashMap.get(word).merge(info);
+            } else {
+                wordInfoHashMap.put(word, info);
+            }
+        });
     }
 
     public void onReady(Consumer<HashMap<String, WordInfo>> consumer) {
