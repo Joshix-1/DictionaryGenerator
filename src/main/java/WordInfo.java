@@ -1,4 +1,5 @@
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,27 +30,26 @@ public class WordInfo {
         nextWords.put(word, nextWords.getOrDefault(word, 0) + 1);
     }
 
-    public String getNextWordsAsString() {
+    public String getNextWordsAsString(HashMap<String, String> wordsIndex) {
         if (nextWords.size() == 0) {
-            return "{ }";
+            return "{}";
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         nextWords.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).forEach(entry -> {
-            sb.append(entry.getKey())
-                    .append(": ")
+            sb.append(wordsIndex.getOrDefault(entry.getKey(), entry.getKey()))
+                    .append(":")
                     .append(entry.getValue())
-                    .append(", ");
+                    .append(",");
         });
-        sb.delete(sb.length() - 2, sb.length()) // remove ", " in the end.
+        sb.delete(sb.length() - 1, sb.length()) // remove ", " in the end.
                 .append("}");
 
         return sb.toString();
     }
 
-    @Override
-    public String toString() {
-        return word + "; " + count + "; " + getNextWordsAsString();
+    public String toString(HashMap<String, String> wordsIndex) {
+        return wordsIndex.get(word) + ":" + word + ";" + count + ";" + getNextWordsAsString(wordsIndex);
     }
 }

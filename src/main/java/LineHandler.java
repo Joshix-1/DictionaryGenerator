@@ -9,8 +9,6 @@ public class LineHandler {
         return wordInfoHashMap;
     }
 
-
-
     public void handle(String line) {
         line = replace(line);
 
@@ -41,8 +39,6 @@ public class LineHandler {
     private static final Pattern AMP = Pattern.compile("&amp;(?:\\w+;)?");
     // &lt;ref name=&quot;Low&quot;&gt;{{Literatur |Autor=George C. Low |DOI=10.1016/S0035-9203(16)90068-3}}&lt;/ref&gt;
     private static final Pattern LT_REF = Pattern.compile("&lt;ref.+;&gt;\\{\\{.+}}&lt;/ref&gt");
-    // &amp;nbsp;(NaH&lt;sub&gt;2&lt;/sub&gt;PO&lt;sub&gt;4&lt;/sub&gt;)
-    //private static final Pattern
     private static final Pattern LG_GT = Pattern.compile("&lt;\\w{3,4}&gt;.+&lt;/\\w{3,4}&gt");
     private static final Pattern PARANTHESES = Pattern.compile("\\(.+\\)");
     private static String replace(String line) {
