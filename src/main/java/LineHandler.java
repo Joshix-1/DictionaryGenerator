@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class LineHandler {
-    private  static final int LINES_IN_THREAD = 10_000;
+    private  static final int LINES_IN_THREAD = 100;
     private final HashMap<String, WordInfo> wordInfoHashMap = new HashMap<>();
     private final List<CompletableFuture<Void>> futures = new LinkedList<>();
     private final ExecutorService executorService;
@@ -22,15 +22,15 @@ public class LineHandler {
     public void handle(String str) {
         lines[linesIndex++] = str;
         if (linesIndex >= LINES_IN_THREAD) {
-            futures.add(LineHandlerThread.handle(Arrays.copyOf(lines, linesIndex), executorService)
-                    .thenAccept(this::mergeWordInfoMap));
-            linesIndex = 0;
+            handleNow();
         }
     }
 
     public void handleNow() {
-        futures.add(LineHandlerThread.handle(Arrays.copyOf(lines, linesIndex), executorService)
-                .thenAccept(this::mergeWordInfoMap));
+        futures.add(
+                LineHandlerThread.handle(Arrays.copyOf(lines, linesIndex), executorService)
+                .thenAccept(this::mergeWordInfoMap)
+        );
         linesIndex = 0;
     }
 
