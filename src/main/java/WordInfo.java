@@ -46,6 +46,10 @@ public class WordInfo {
         return intToWord(word);
     }
 
+    public int getWordInt() {
+        return word;
+    }
+
     synchronized public void increaseCount() {
         count++;
     }
@@ -55,7 +59,7 @@ public class WordInfo {
         nextWords.put(w, nextWords.getOrDefault(w, 0) + 1);
     }
 
-    public String getNextWordsAsString(HashMap<String, String> wordsIndex) {
+    public String getNextWordsAsString(HashMap<Integer, String> wordsIndex) {
         if (nextWords.size() == 0) {
             return "{}";
         }
@@ -66,8 +70,7 @@ public class WordInfo {
                 .stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .forEach(entry -> {
-                    String word = intToWord(entry.getKey());
-                    sb.append(wordsIndex.getOrDefault(word, word))
+                    sb.append(wordsIndex.getOrDefault(entry.getKey(), intToWord(entry.getKey())))
                             .append(":")
                             .append(entry.getValue())
                             .append(",");
@@ -78,8 +81,7 @@ public class WordInfo {
         return sb.toString();
     }
 
-    public String toString(HashMap<String, String> wordsIndex) {
-        String word = getWord();
-        return wordsIndex.get(word) + ":" + word + ";" + count + ";" + getNextWordsAsString(wordsIndex);
+    public String toString(HashMap<Integer, String> wordsIndex) {
+        return wordsIndex.get(word) + ":" + intToWord(word) + ";" + count + ";" + getNextWordsAsString(wordsIndex);
     }
 }

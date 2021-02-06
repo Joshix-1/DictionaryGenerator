@@ -1,7 +1,6 @@
-import dumonts.hunspell.Hunspell;
+
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -16,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Main {
-    static String outputFile = "ouput.txt";
+    static String outputFile = "output.txt";
     static String hunspellDic = "", hunspellAff = "";
     static int threadCount = 0;
     static String fileName = "";
@@ -39,17 +38,16 @@ public class Main {
         LineHandler lineHandler = new LineHandler();
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
+
         int i = 0;
         for (String line = br.readLine(); line != null; line = br.readLine()) {
             String finalLine = line.trim();
             if (finalLine.length() > 0 && Character.isLetter(finalLine.charAt(0))) {
                 //System.out.println(finalLine);
-                executorService.submit(() -> {
-                    lineHandler.handle(finalLine);
-                });
+                lineHandler.handle(finalLine);
 
                 // only for debugging:
-                if (i++ > 50_000) {
+                if (i++ > 5_000) {
                     break;
                 }
             }
@@ -78,10 +76,10 @@ public class Main {
                 ///.filter(wordInfo -> hunspell.spell(wordInfo.getWord()))
                 .collect(Collectors.toList());
 
-        HashMap<String, String> wordIndex = new HashMap<>();
+        HashMap<Integer, String> wordIndex = new HashMap<>();
 
         for (int i = 0; i < words.size(); i++) {
-            wordIndex.put(words.get(i).getWord(), Integer.toString(i, 36));
+            wordIndex.put(words.get(i).getWordInt(), Integer.toString(i, 36));
         }
 
         try {
