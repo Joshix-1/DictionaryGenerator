@@ -10,8 +10,6 @@ import java.util.List;
 import java.io.FileReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -35,7 +33,7 @@ public class Main {
 
         BufferedReader br = new BufferedReader(new FileReader(fileName));
 
-        LineHandler lineHandler = new LineHandler();
+        LineHandler lineHandler = new LineHandler(threadCount);
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
 
@@ -52,24 +50,15 @@ public class Main {
                 }
             }
         }
+        lineHandler.handleNow();
 
-        // Initiates an orderly shutdown in which previously submitted tasks are executed, but no new tasks will be accepted.
-        executorService.shutdown();
-
-        ScheduledExecutorService waiter = Executors.newSingleThreadScheduledExecutor();
-        waiter.scheduleAtFixedRate(() -> {
-            // Returns true if all tasks have completed following shut down.
-            if (executorService.isTerminated()) {
-                printResult(lineHandler);
-            }
-        }, 1L, 1L, TimeUnit.SECONDS);
+        lineHandler.onReady(Main::printResult);
     }
 
-    private static void printResult(LineHandler lineHandler) {
+    private static void printResult(HashMap<String, WordInfo> wordInfoHashMap) {
         //Hunspell hunspell = new Hunspell(Paths.get(hunspellDic), Paths.get(hunspellAff));
 
-        List<WordInfo> words = lineHandler
-                .getWordInfoHashMap()
+        List<WordInfo> words = wordInfoHashMap
                 .values()
                 .stream()
                 .sorted(Comparator.comparing(WordInfo::getCount).reversed())
