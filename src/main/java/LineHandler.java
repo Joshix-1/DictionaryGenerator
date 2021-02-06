@@ -1,4 +1,5 @@
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 public class LineHandler {
     private final ConcurrentHashMap<String, WordInfo> wordInfoHashMap = new ConcurrentHashMap<>();
@@ -8,22 +9,50 @@ public class LineHandler {
         return wordInfoHashMap;
     }
 
+
+
     public void handle(String line) {
-        String lastWord = "";
+        line = replace(line);
+
+        // debug:
+        //System.out.println(line);
 
         int wordBegin = -1;
         char[] chars = line.toCharArray();
         for (int i = 0, charArrayLength = chars.length; i < charArrayLength; i++) {
-            if (charBelongsToWord(chars[i])) {
-                // here begins a word:
-                if (wordBegin == -1) wordBegin = i;
-            } else if (wordBegin != -1){
-                String word = line.substring(wordBegin, i);
-                handleWord(word);
-                wordBegin = -1;
-            }
+            char ch = chars[i];
+            if (wordBegin == -1) { // currently outside of word:
+                if (Character.isLetter(ch)) { //word begins here:
+                    wordBegin = i;
+                }
+            } else { // inside of word:
+                if (!charBelongsToWord(ch)) { // word is over
+                    String word = line.substring(wordBegin, i);
+                    handleWord(word);
 
+                    // reset word begin:
+                    wordBegin = -1;
+                }
+            }
         }
+    }
+
+    private static final Pattern BRACKETS = Pattern.compile("(?:\\[\\[)|(?:]])");
+    private static final Pattern AMP = Pattern.compile("&amp;(?:\\w+;)?");
+    // &lt;ref name=&quot;Low&quot;&gt;{{Literatur |Autor=George C. Low |DOI=10.1016/S0035-9203(16)90068-3}}&lt;/ref&gt;
+    private static final Pattern LT_REF = Pattern.compile("&lt;ref.+;&gt;\\{\\{.+}}&lt;/ref&gt");
+    // &amp;nbsp;(NaH&lt;sub&gt;2&lt;/sub&gt;PO&lt;sub&gt;4&lt;/sub&gt;)
+    //private static final Pattern
+    private static final Pattern LG_GT = Pattern.compile("&lt;\\w{3,4}&gt;.+&lt;/\\w{3,4}&gt");
+    private static final Pattern PARANTHESES = Pattern.compile("\\(.+\\)");
+    private static String replace(String line) {
+        line = BRACKETS.matcher(line).replaceAll("");
+        line = AMP.matcher(line).replaceAll("");
+        line = LT_REF.matcher(line).replaceAll("");
+        line = LG_GT.matcher(line).replaceAll("");
+        line = PARANTHESES.matcher(line).replaceAll("");
+
+        return line;
     }
 
     private static boolean charBelongsToWord(char ch) {
@@ -44,7 +73,10 @@ public class LineHandler {
             wordInfoHashMap.put(currentWord, new WordInfo(currentWord));
         }
 
-        if (lastWord == null) return;
+        if (lastWord == null) {
+            lastWord = currentWord;
+            return;
+        }
 
         // map contains key because last word gets set after putting it in the map
         wordInfoHashMap.get(lastWord).addNextWord(currentWord);
