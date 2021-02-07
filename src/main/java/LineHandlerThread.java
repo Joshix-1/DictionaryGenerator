@@ -48,16 +48,52 @@ public class LineHandlerThread {
         }
     }
 
-    private static final Pattern AMP = Pattern.compile("&amp;(?:\\w+;)?");
-    // &lt;ref name=&quot;Low&quot;&gt;{{Literatur |Autor=George C. Low |DOI=10.1016/S0035-9203(16)90068-3}}&lt;/ref&gt;
-    private static final Pattern LT_REF = Pattern.compile("&lt;ref.+;&gt;\\{\\{.+}}&lt;/ref&gt");
-    private static final Pattern LG_GT = Pattern.compile("&lt;\\w{3,4}&gt;.+&lt;/\\w{3,4}&gt");
-    private static final Pattern PARANTHESES = Pattern.compile("\\(.+\\)");
-    private static String replace(String line) {
-        line = AMP.matcher(line).replaceAll("");
-        line = LT_REF.matcher(line).replaceAll("");
-        line = LG_GT.matcher(line).replaceAll("");
-        line = PARANTHESES.matcher(line).replaceAll("");
+    /*
+    Character escapes in xml:
+        "   &quot;
+        '   &apos;
+        <   &lt;
+        >   &gt;
+        &   &amp;
+     */
+    private static final Pattern NBSP = Pattern.compile("&nbsp");
+    private static final Pattern CHARS_TO_STRIP = Pattern.compile("[;']");
+
+    private static final Pattern DOUBLE_QUOTE = Pattern.compile("&quot");
+    private static final Pattern SINGLE_QUOTE = Pattern.compile("&apos");
+    private static final Pattern LOWER_THAN = Pattern.compile("&lt");
+    private static final Pattern GREATER_THAN = Pattern.compile("&gt");
+    private static final Pattern AND = Pattern.compile("&amp");
+    private static final Pattern HTML_REPLACE = Pattern.compile("<(\\w{2,4})[^>]*>(.*)</\\1[^>]*>");
+    private static final Pattern HTML_REPLACE2 = Pattern.compile("</?(\\w{2,4})[^>]*>");
+    private static final Pattern HTML_REF = Pattern.compile("<ref[^>]*>[^<]*</ref[^>]*>");
+    private static final Pattern RENAMED_LINK = Pattern.compile("\\[\\[([^\\[\\]|]+)\\|[^\\[\\]|]+]]"); // with |
+    private static final Pattern RENAMED_LINK2 = Pattern.compile("\\[\\[([^\\[\\]|]+),[^\\[\\]|]+]]"); // with ,
+    private static final Pattern HIDE_NAMESPACE = Pattern.compile("\\[\\[[^\\[\\]|]+:([^\\[\\]|]+)\\|]]");
+    private static final Pattern PARENTHESES = Pattern.compile("\\(.+\\)");
+    private static final Pattern BRACKETS = Pattern.compile("[\\[\\]{}]");
+
+    static String replace(String line) {
+        // replace simple replacements:
+        line = AND.matcher(line).replaceAll("&");
+        line = NBSP.matcher(line).replaceAll(" ");
+        line = CHARS_TO_STRIP.matcher(line).replaceAll("");
+        line = PARENTHESES.matcher(line).replaceAll("");
+        // replace wiki stuff: (https://en.wikipedia.org/wiki/Help:Wikitext#Layout)
+        line = RENAMED_LINK.matcher(line).replaceAll(m -> m.group(1));
+        line = RENAMED_LINK2.matcher(line).replaceAll(m -> m.group(1));
+        line = HIDE_NAMESPACE.matcher(line).replaceAll(m -> m.group(1));
+        // reescape chars
+        line = DOUBLE_QUOTE.matcher(line).replaceAll("\"");
+        line = SINGLE_QUOTE.matcher(line).replaceAll("'");
+        line = LOWER_THAN.matcher(line).replaceAll("<");
+        line = GREATER_THAN.matcher(line).replaceAll(">");
+        // strip html-tags and content in it
+        line = HTML_REF.matcher(line).replaceAll("");
+        line = HTML_REPLACE.matcher(line).replaceAll(m -> m.group(2));
+        line = HTML_REPLACE2.matcher(line).replaceAll("");
+        // replace brackets:
+        line = BRACKETS.matcher(line).replaceAll("");
 
         return line;
     }

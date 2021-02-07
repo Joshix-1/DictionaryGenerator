@@ -1,9 +1,10 @@
 
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +30,16 @@ public class Main {
 
         LineHandler lineHandler = new LineHandler(threadCount);
 
+        // debug:
+        //System.setOut(new PrintStream("test.txt"));
         int i = 0;
         for (String line = br.readLine(); line != null; line = br.readLine()) {
             String finalLine = line.trim();
             if (finalLine.length() > 0 && Character.isLetter(finalLine.charAt(0))) {
+                //System.out.println(LineHandlerThread.replace(finalLine));
                 lineHandler.handle(finalLine);
 
-                if (i++ > 50_000) {
+                if (i++ > 500) {
                     break;
                 }
             }
@@ -49,6 +53,7 @@ public class Main {
         List<WordInfo> words = wordInfoHashMap
                 .values()
                 .stream()
+                .filter(wordInfo -> wordInfo.getCount() > 1)
                 .sorted(Comparator.comparing(WordInfo::getCount).reversed())
                 .collect(Collectors.toList());
 
@@ -59,12 +64,12 @@ public class Main {
         }
 
         try {
-            PrintWriter writer = new PrintWriter(OUTPUT_TXT, "UTF-8");
+            PrintWriter writer = new PrintWriter(OUTPUT_TXT, StandardCharsets.UTF_8);
             words.forEach(wordInfo -> {
                 writer.println(wordInfo.toString(wordIndex));
             });
             writer.close();
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
