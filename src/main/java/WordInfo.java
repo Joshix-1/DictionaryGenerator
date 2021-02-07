@@ -29,7 +29,7 @@ public class WordInfo {
     }
 
     public String toString(HashMap<String, String> wordsIndex) {
-        return wordsIndex.get(word) + ":" + word + ";" + count + ";" + getNextWordsAsString(wordsIndex);
+        return /*wordsIndex.get(word) + ":" +*/ word + ";" + count + ";" + getNextWordsAsString(wordsIndex);
     }
 
     public String getNextWordsAsString(HashMap<String, String> wordsIndex) {

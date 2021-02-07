@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class LineHandler {
-    private  static final int LINES_IN_THREAD = 100;
+    private  static final int LINES_IN_THREAD = 10_000;
     private final HashMap<String, WordInfo> wordInfoHashMap = new HashMap<>();
     private final List<CompletableFuture<Void>> futures = new LinkedList<>();
     private final ExecutorService executorService;

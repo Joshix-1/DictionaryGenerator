@@ -32,16 +32,18 @@ public class Main {
 
         // debug:
         //System.setOut(new PrintStream("test.txt"));
-        int i = 0;
+        //int i = 0;
         for (String line = br.readLine(); line != null; line = br.readLine()) {
             String finalLine = line.trim();
             if (finalLine.length() > 0 && Character.isLetter(finalLine.charAt(0))) {
                 //System.out.println(LineHandlerThread.replace(finalLine));
                 lineHandler.handle(finalLine);
 
-                if (i++ > 500) {
+                /* for debugging:
+                if (i++ > 1_000_000) {
                     break;
                 }
+                */
             }
         }
         lineHandler.handleNow();
@@ -53,14 +55,14 @@ public class Main {
         List<WordInfo> words = wordInfoHashMap
                 .values()
                 .stream()
-                .filter(wordInfo -> wordInfo.getCount() > 1)
+                //.filter(wordInfo -> wordInfo.getCount() > 1)
                 .sorted(Comparator.comparing(WordInfo::getCount).reversed())
                 .collect(Collectors.toList());
 
         HashMap<String, String> wordIndex = new HashMap<>();
 
         for (int i = 0; i < words.size(); i++) {
-            wordIndex.put(words.get(i).getWord(), Integer.toString(i, 10));
+            wordIndex.put(words.get(i).getWord(), Integer.toString(i, 36));
         }
 
         try {
